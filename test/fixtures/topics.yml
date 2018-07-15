@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  series: one
+  store: one
+  tid: MyString
+  title: MyString
+  topic_number: MyString
+  summary: MyText
+  thumbnail_url: MyString
+  viewer_url: MyString
+  deleted: false
+
+two:
+  series: two
+  store: two
+  tid: MyString
+  title: MyString
+  topic_number: MyString
+  summary: MyText
+  thumbnail_url: MyString
+  viewer_url: MyString
+  deleted: false
