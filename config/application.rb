@@ -28,5 +28,12 @@ module FreeComics
     # the framework and any gems in your application.
     config.autoload_paths += %W(#{config.root}/lib)
     config.enable_dependency_loading = true
+
+    # クローラ関連
+    config.url_base_linemanga = 'https://manga.line.me/daily_list?week_day='
+    # サムネイル格納場所
+    config.cdn_prefix = 'fc'
+    config.cdn_folder_linemanga = 'lm'
+
   end
 end
