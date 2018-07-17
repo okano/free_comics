@@ -2,8 +2,10 @@ module Crawler::LineManga extend self
 
 require "#{Rails.root}/app/models/series"
 require "#{Rails.root}/app/models/topic"
+require "#{Rails.root}/lib/crawler/my_aws"
 require 'date'
 require 'open-uri'
+require 'tempfile'
 require 'nokogiri'
 
   def batch
@@ -11,9 +13,11 @@ require 'nokogiri'
     #s = Series.create(title: "test title", author: "author-X", summary:"abc
 #def
 #ghi", thumbnail_url: "http://example.com/abc")
+    @bucket = nil  # AWS S3
 
     # 日付からURLを得る
     url = FreeComics::Application.config.url_base_linemanga + (Date.today.wday + 1).to_s
+    p url
 
     # シリーズ一覧を得る
     charset = nil
@@ -37,12 +41,26 @@ require 'nokogiri'
 
       # 初めてのシリーズなら、DBに保存して、サムネイル画像をCDNに保存
       if !Series.find_by(title: title) then
-        Series.create(sid: series_sid, title: title, author: author, summary:"", thumbnail_url: thumbnail_url)
+        # サムネイル画像の保存
+        open(thumbnail_url) { |image|
+          Tempfile.open { |t|
+            p 'thumbnail_url_basename=' + File.basename(thumbnail_url)
+            p 't.path=' + t.path
+            t.binmode
+            t.write image.read
+
+            # S3へアップロード
+            @aws ||= MyAws.new  # 初回のみ初期設定
+            s3_url = @aws.send("lm/thumbnail", t.path, File.basename(thumbnail_url))
+
+            # サムネイル画像のURL付きでDBに保存
+            Series.create(sid: series_sid, title: title, author: author,
+                           summary:"", thumbnail_url: s3_url)
+          }
+        }
+        
       # シリーズ内の各話を取得
       end
     end
-
-
-
   end
 end
