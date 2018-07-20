@@ -18,7 +18,9 @@ class MyAws
     p 'upd_fullpath=' + upd_fullpath
     p 'file_name=' + file_name
     o = @bucket.object(s3_path + '/' + file_name)
-    o.upload_file(upd_fullpath)
-    return s3_path + '/' + file_name
+    #o.upload_file(upd_fullpath)
+    o.upload_file(upd_fullpath, {acl:'public-read'})
+    p 'public_url=' + o.public_url
+    return o.public_url
   end
 end

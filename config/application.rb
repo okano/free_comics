@@ -32,7 +32,7 @@ module FreeComics
     # クローラ関連
     config.url_base_linemanga = 'https://manga.line.me/daily_list?week_day='
     # サムネイル格納場所
-    config.cdn_prefix = 'fc'
+    #config.cdn_prefix = 'fc'
     config.cdn_folder_linemanga = 'lm'
 
   end
