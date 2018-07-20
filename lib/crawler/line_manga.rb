@@ -39,7 +39,7 @@ require 'nokogiri'
       series_sid_str = node.css('a').attribute("href").value if node.css('a').attribute("href")
       series_sid = series_sid_str.split("/product/periodic?id=").last if series_sid_str
 
-      # 初めてのシリーズなら、DBに保存して、サムネイル画像をCDNに保存
+      # 初めてのシリーズなら、サムネイル画像をCDNに保存して、DBに保存
       if !Series.find_by(title: title) then
         # サムネイル画像の保存
         open(thumbnail_org_url) { |image|
@@ -56,11 +56,11 @@ require 'nokogiri'
                                 t.path,
                                 upload_filename)
 
-            # サムネイル画像のURL付きでDBに保存
-            Series.create(sid: series_sid, title: title, author: author,
-                           summary:"", thumbnail_url: s3_url)
           }
         }
+        # サムネイル画像のURL付きでDBに保存
+        Series.create(sid: series_sid, title: title, author: author,
+                      summary:"", thumbnail_url: s3_url)
         
       # シリーズ内の各話を取得
       end
