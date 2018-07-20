@@ -9,26 +9,11 @@ require 'tempfile'
 require 'nokogiri'
 
   def batch
-    #p 'this is test crawler.'
-    #s = Series.create(title: "test title", author: "author-X", summary:"abc
-#def
-#ghi", thumbnail_org_url: "http://example.com/abc")
-    @bucket = nil  # AWS S3
-
     # 日付からURLを得る
     url = FreeComics::Application.config.url_base_linemanga + (Date.today.wday + 1).to_s
-    p url
-
     # シリーズ一覧を得る
-    charset = nil
-    html = open(url) do |f|
-      charset = f.charset # 文字種別を取得
-      f.read # htmlを読み込んで変数htmlに渡す
-    end
-    #File.open("html.txt", "w") {|f| f.puts(html) }
-
-    doc = Nokogiri::HTML.parse(html, nil, charset)
-    ## File.open("html-parse.txt", "w") {|f| f.puts(doc) }
+    doc = parse_html(url)
+    # 各シリーズごとに処理
     doc.css('div .mdCMN04Item').each do |node|
       p '--------'
       #p node
@@ -65,5 +50,18 @@ require 'nokogiri'
       # シリーズ内の各話を取得
       end
     end
+  end
+
+  def parse_html(url)
+    #p "url=" + url
+    charset = nil
+    html = open(url) do |f|
+      charset = f.charset # 文字種別を取得
+      f.read # htmlを読み込んで変数htmlに渡す
+    end
+    #File.open("html.txt", "w") {|f| f.puts(html) }
+
+    doc = Nokogiri::HTML.parse(html, nil, charset)
+    ## File.open("html-parse.txt", "w") {|f| f.puts(doc) }
   end
 end
