@@ -21,38 +21,12 @@ require 'json'
     doc.css('div .mdCMN04Item').each do |node|
       p '--------'
       #p node
-      title = node.css('h2').text if node.css('h2')
-      author = node.css('div .mdCMN04Name').text if node.css('div .mdCMN04Name')
-      thumbnail_org_url = node.css('img').attribute("data-lz-src").value if node.css('img').attribute("data-lz-src")
-      p title, author, thumbnail_org_url
+      # リリーズのIDを取得
       series_sid_str = node.css('a').attribute("href").value if node.css('a').attribute("href")
       series_sid = series_sid_str.split("/product/periodic?id=").last if series_sid_str
-      p series_sid
+      p "series_sid=" + series_sid
 
-      detail_url = FreeComics::Application.config.url_base_linemanga \
-                 + FreeComics::Application.config.url_detail_linemanga \
-                 + series_sid
-      doc_detail = parse_html(detail_url)
-
-      # 初めてのシリーズなら、サムネイル画像をCDNに保存して、DBに保存
-      series = Series.find_by(title: title)
-      if !series then
-        # サムネイル画像の保存
-        upload_s3(thumbnail_org_url)
-
-        # 概要を得る
-        summary = doc_detail.css('.MdMNG04Intro').text if doc_detail.css('.MdMNG04Intro')
-        p "summary=" + summary
-        # サムネイル画像のURL付きでDBに保存
-        @s = Series.create(sid: series_sid, title: title, author: author,
-                          summary:summary, thumbnail_url: @s3_url)
-        p "series inserted. id=" + @s.id.to_s
-      end
-      @s ||= Series.find_by(title: title)
-      p "title=" + title
-      p "Series id=" + @s.id.to_s
-
-      # シリーズ内の各話を取得
+      # シリーズの概要と各話を取得
       detail_all_url = FreeComics::Application.config.url_base_linemanga \
                      + FreeComics::Application.config.url_detail_all_linemanga \
                      + series_sid
@@ -60,8 +34,30 @@ require 'json'
       doc_detail_all = parse_html(detail_all_url)
       hash = JSON.parse(doc_detail_all)
       File.open("json.txt", "w") {|f| f.puts(JSON.pretty_generate(hash)) }
+      title = hash['result']['product']['name']
+      author =hash['result']['product']['author_name']
+      thumbnail_org_url = hash['result']['product']['thumbnail']
+      summary = hash['result']['product']['explanation']
+      p title, author, thumbnail_org_url
 
+      # 初めてのシリーズなら、サムネイル画像をCDNに保存して、DBに保存
+      series = Series.find_by(title: title)
+      if !series then
+        # サムネイル画像の保存
+        @s3_url = upload_s3(thumbnail_org_url)
+
+        # サムネイル画像のURL付きでDBに保存
+        @s = Series.create(sid: series_sid, title: title, author: author,
+                          summary:summary, thumbnail_url: @s3_url)
+        p "series inserted. id=" + @s.id.to_s
+      end
+      @s ||= Series.find_by(title: title)
+      #p "title=" + title
+      #p "Series id=" + @s.id.to_s
+
+      # シリーズ内の各話を処理
       hash['result']['rows'].each do |row|
+        p '---'
         topic_number = row['volume'].to_s
         topic_title = row['name']
         topic_thumbnail_org_url = row['thumbnail']
@@ -72,6 +68,7 @@ require 'json'
         p "topic_number=" + topic_number
         p "topic_title=" + topic_title
         p "topic_payment=" + topic_payment.to_s
+        p "topic_thumbnail_org_url=" + topic_thumbnail_org_url
         if !topic_payment then
           if !Topic.find_by(title: topic_title) then
             # 新しいtopicなら、サムネイル画像の保存とDBへの書き込み
@@ -114,13 +111,16 @@ require 'json'
     # サムネイル画像の保存
     open(original_url) { |image|
       Tempfile.open { |t|
-        p 'original_url=' + File.basename(original_url)
-        p 't.path=' + t.path
+        #p 'original_url=' + original_url
+        #p 't.path=' + t.path
         t.binmode
         t.write image.read
+        p "filesize=" + File.size(t.path).to_s
 
-        # S3へアップロード
-        upload_filename = SecureRandom.urlsafe_base64 + File.basename(original_url)
+        # S3へアップロード(ファイル名の後ろのクエリ文字列は削除)
+        ext = File.extname(original_url).slice(0, File.extname(original_url).index('?'))  # 拡張子のみ取り出す(「?time=1532328」等を削除)
+        upload_filename = SecureRandom.urlsafe_base64 + ext
+        p "upload_filename=" + upload_filename
         @aws ||= MyAws.new  # 初回のみ初期設定
         @s3_url = @aws.send(FreeComics::Application.config.cdn_folder_linemanga,
                             t.path,
