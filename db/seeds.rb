@@ -1,0 +1,2 @@
+Store.create(name: 'LINEマンガ')
+

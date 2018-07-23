@@ -35,6 +35,7 @@ module FreeComics
     config.url_detail_linemanga = '/product/periodic?id='
     config.url_detail_all_linemanga = '/api/book/product_list?need_read_info=1&rows=1000&is_periodic=1&product_id='
     config.url_viewer_linemanga = '/book/viewer?id='
+    config.store_name = 'LINEマンガ'
     # サムネイル格納場所
     #config.cdn_prefix = 'fc'
     config.cdn_folder_linemanga = 'lm'
