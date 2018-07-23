@@ -8,4 +8,5 @@ class Series
   field :deleted, type: Mongoid::Boolean, default: false
   include Mongoid::Document
   include Mongoid::Timestamps
+  has_many :topics
 end
