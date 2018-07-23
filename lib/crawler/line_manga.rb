@@ -46,7 +46,7 @@ require 'json'
         # サムネイル画像のURL付きでDBに保存
         @s = Series.create(sid: series_sid, title: title, author: author,
                           summary:summary, thumbnail_url: @s3_url)
-        p "series inserted. id=" + s.id.to_s
+        p "series inserted. id=" + @s.id.to_s
       end
       @s ||= Series.find_by(title: title)
       p "title=" + title
@@ -77,7 +77,7 @@ require 'json'
             # 新しいtopicなら、サムネイル画像の保存とDBへの書き込み
             topic_thumbnail_url = upload_s3(topic_thumbnail_org_url)
 
-            store = Store.first   # FIXME
+            store = Store.find_by(name: FreeComics::Application.config.store_name)
             #t = Topic.create(series: @s)
             t = Topic.create(series: @s,
                             store: store,
