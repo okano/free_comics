@@ -110,12 +110,14 @@ require 'json'
   def upload_s3(original_url)
     # サムネイル画像の保存
     open(original_url) { |image|
-      Tempfile.open { |t|
-        #p 'original_url=' + original_url
-        #p 't.path=' + t.path
-        t.binmode
-        t.write image.read
-        p "filesize=" + File.size(t.path).to_s
+      #Tempfileだと2個目以降のファイルが書き込めないため、普通のファイルを使う
+      File.binwrite("tmp.bin", image.read)
+#      Tempfile.open { |t|
+#        #p 'original_url=' + original_url
+#        #p 't.path=' + t.path
+#        t.binmode
+#        t.write image.read
+#        p "filesize=" + File.size(t.path).to_s
 
         # S3へアップロード(ファイル名の後ろのクエリ文字列は削除)
         ext = File.extname(original_url).slice(0, File.extname(original_url).index('?'))  # 拡張子のみ取り出す(「?time=1532328」等を削除)
@@ -123,9 +125,9 @@ require 'json'
         p "upload_filename=" + upload_filename
         @aws ||= MyAws.new  # 初回のみ初期設定
         @s3_url = @aws.send(FreeComics::Application.config.cdn_folder_linemanga,
-                            t.path,
+                            "tmp.bin",  #t.path,
                             upload_filename)
-      }
+      #}
     }
     return @s3_url
   end
