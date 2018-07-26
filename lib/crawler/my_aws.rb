@@ -27,7 +27,7 @@ class MyAws
     return o.public_url
   end
 
-  def self.upload_s3(original_url)
+  def self.upload_s3(original_url, folder_name)
     # サムネイル画像の保存
     open(original_url) { |image|
       #Tempfileだと2個目以降のファイルが書き込めないため、普通のファイルを使う
@@ -37,7 +37,7 @@ class MyAws
       upload_filename = SecureRandom.urlsafe_base64 + ext
       p "upload_filename=" + upload_filename
       @aws ||= MyAws.new  # 初回のみ初期設定
-      @s3_url = @aws.send(FreeComics::Application.config.cdn_folder_linemanga,
+      @s3_url = @aws.send(folder_name,
                           @tempfilename,
                           upload_filename)
     }

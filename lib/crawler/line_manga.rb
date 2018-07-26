@@ -44,7 +44,7 @@ require 'json'
       series = Series.find_by(title: title)
       if !series then
         # サムネイル画像の保存
-        @s3_url = MyAws.upload_s3(thumbnail_org_url)
+        @s3_url = MyAws.upload_s3(thumbnail_org_url, FreeComics::Application.config.cdn_folder_linemanga)
 
         # サムネイル画像のURL付きでDBに保存
         @s = Series.create(sid: series_sid, title: title, author: author,
@@ -72,7 +72,7 @@ require 'json'
         if !topic_payment then
           if !Topic.find_by(title: topic_title) then
             # 新しいtopicなら、サムネイル画像の保存とDBへの書き込み
-            topic_thumbnail_url = MyAws.upload_s3(topic_thumbnail_org_url)
+            topic_thumbnail_url = MyAws.upload_s3(topic_thumbnail_org_url, FreeComics::Application.config.cdn_folder_linemanga)
 
             store = Store.find_by(name: FreeComics::Application.config.store_name)
             #t = Topic.create(series: @s)
