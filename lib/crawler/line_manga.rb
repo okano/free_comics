@@ -8,6 +8,7 @@ require 'date'
 require 'open-uri'
 require 'nokogiri'
 require 'json'
+@debug = true
 
   def batch
     # 日付からURLを得る
@@ -62,13 +63,14 @@ require 'json'
         topic_title = row['name']
         topic_thumbnail_org_url = row['thumbnail']
         topic_payment = row['allow_charge']
-        viewer_url = FreeComics::Application.config.url_base_linemanga
-                     + FreeComics::Application.config.url_viewer_linemanga
+        viewer_url = FreeComics::Application.config.url_base_linemanga \
+                     + FreeComics::Application.config.url_viewer_linemanga \
                      + row['id']
         p "topic_number=" + topic_number
         p "topic_title=" + topic_title
         p "topic_payment=" + topic_payment.to_s
         p "topic_thumbnail_org_url=" + topic_thumbnail_org_url
+        p "viewer_url=" + viewer_url
         if !topic_payment then
           if !Topic.find_by(title: topic_title) then
             # 新しいtopicなら、サムネイル画像の保存とDBへの書き込み
@@ -89,6 +91,8 @@ require 'json'
           end
         end
       end
+      #デバッグ時は1シリーズ取得したら終了
+      exit if @debug == true
     end
   end
 
