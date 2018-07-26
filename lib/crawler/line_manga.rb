@@ -75,7 +75,7 @@ require 'json'
                        + FreeComics::Application.config.url_viewer_linemanga \
                        + row['id']
             p "viewer_url=" + viewer_url
-            store = Store.find_by(name: FreeComics::Application.config.store_name)
+            store = Store.find_by(name: FreeComics::Application.config.store_name_linemanga)
             #t = Topic.create(series: @s)
             t = Topic.create(series: @s,
                             store: store,
