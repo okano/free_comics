@@ -31,7 +31,7 @@ require 'json'
       detail_all_url = FreeComics::Application.config.url_base_linemanga \
                      + FreeComics::Application.config.url_detail_all_linemanga \
                      + series_sid
-      p "detail_all_url=" + detail_all_url
+      #p "detail_all_url=" + detail_all_url
       doc_detail_all = MyUtil.parse_html(detail_all_url)
       hash = JSON.parse(doc_detail_all)
       File.open("json.txt", "w") {|f| f.puts(JSON.pretty_generate(hash)) }
@@ -39,7 +39,8 @@ require 'json'
       author =hash['result']['product']['author_name']
       thumbnail_org_url = hash['result']['product']['thumbnail']
       summary = hash['result']['product']['explanation']
-      p title, author, thumbnail_org_url
+      p "title=" + title + ", author=" + author
+      #p thumbnail_org_url
 
       # 初めてのシリーズなら、サムネイル画像をCDNに保存して、DBに保存
       series = Series.find_by(title: title)
@@ -59,23 +60,21 @@ require 'json'
       # シリーズ内の各話を処理
       hash['result']['rows'].each do |row|
         p '---'
-        topic_number = row['volume'].to_s
         topic_title = row['name']
-        topic_thumbnail_org_url = row['thumbnail']
         topic_payment = row['allow_charge']
-        viewer_url = FreeComics::Application.config.url_base_linemanga \
-                     + FreeComics::Application.config.url_viewer_linemanga \
-                     + row['id']
-        p "topic_number=" + topic_number
         p "topic_title=" + topic_title
         p "topic_payment=" + topic_payment.to_s
-        p "topic_thumbnail_org_url=" + topic_thumbnail_org_url
-        p "viewer_url=" + viewer_url
         if !topic_payment then
           if !Topic.find_by(title: topic_title) then
             # 新しいtopicなら、サムネイル画像の保存とDBへの書き込み
+            topic_thumbnail_org_url = row['thumbnail']
             topic_thumbnail_url = MyAws.upload_s3(topic_thumbnail_org_url, FreeComics::Application.config.cdn_folder_linemanga)
+            p "topic_thumbnail_org_url=" + topic_thumbnail_org_url
 
+            viewer_url = FreeComics::Application.config.url_base_linemanga \
+                       + FreeComics::Application.config.url_viewer_linemanga \
+                       + row['id']
+            p "viewer_url=" + viewer_url
             store = Store.find_by(name: FreeComics::Application.config.store_name)
             #t = Topic.create(series: @s)
             t = Topic.create(series: @s,
