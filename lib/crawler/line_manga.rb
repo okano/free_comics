@@ -3,9 +3,9 @@ module Crawler::LineManga extend self
 require "#{Rails.root}/app/models/series"
 require "#{Rails.root}/app/models/topic"
 require "#{Rails.root}/lib/crawler/my_aws"
+require "#{Rails.root}/lib/crawler/my_util"
 require 'date'
 require 'open-uri'
-require 'tempfile'
 require 'nokogiri'
 require 'json'
 
@@ -16,12 +16,12 @@ require 'json'
         + (Date.today.wday + 1).to_s
     p "url=" + url
     # シリーズ一覧を得る
-    doc = parse_html(url)
+    doc = MyUtil.parse_html(url)
     # 各シリーズごとに処理
     doc.css('div .mdCMN04Item').each do |node|
       p '--------'
       #p node
-      # リリーズのIDを取得
+      # シリーズのIDを取得
       series_sid_str = node.css('a').attribute("href").value if node.css('a').attribute("href")
       series_sid = series_sid_str.split("/product/periodic?id=").last if series_sid_str
       p "series_sid=" + series_sid
@@ -31,7 +31,7 @@ require 'json'
                      + FreeComics::Application.config.url_detail_all_linemanga \
                      + series_sid
       p "detail_all_url=" + detail_all_url
-      doc_detail_all = parse_html(detail_all_url)
+      doc_detail_all = MyUtil.parse_html(detail_all_url)
       hash = JSON.parse(doc_detail_all)
       File.open("json.txt", "w") {|f| f.puts(JSON.pretty_generate(hash)) }
       title = hash['result']['product']['name']
@@ -44,7 +44,7 @@ require 'json'
       series = Series.find_by(title: title)
       if !series then
         # サムネイル画像の保存
-        @s3_url = upload_s3(thumbnail_org_url)
+        @s3_url = MyAws.upload_s3(thumbnail_org_url)
 
         # サムネイル画像のURL付きでDBに保存
         @s = Series.create(sid: series_sid, title: title, author: author,
@@ -72,7 +72,7 @@ require 'json'
         if !topic_payment then
           if !Topic.find_by(title: topic_title) then
             # 新しいtopicなら、サムネイル画像の保存とDBへの書き込み
-            topic_thumbnail_url = upload_s3(topic_thumbnail_org_url)
+            topic_thumbnail_url = MyAws.upload_s3(topic_thumbnail_org_url)
 
             store = Store.find_by(name: FreeComics::Application.config.store_name)
             #t = Topic.create(series: @s)
@@ -89,47 +89,6 @@ require 'json'
           end
         end
       end
-
-      xx
     end
   end
-
-  def parse_html(url)
-    #p "url=" + url
-    charset = nil
-    html = open(url) do |f|
-      charset = f.charset # 文字種別を取得
-      f.read # htmlを読み込んで変数htmlに渡す
-    end
-    #File.open("html.txt", "w") {|f| f.puts(html) }
-
-    doc = Nokogiri::HTML.parse(html, nil, charset)
-    ## File.open("html-parse.txt", "w") {|f| f.puts(doc) }
-  end
-
-  def upload_s3(original_url)
-    # サムネイル画像の保存
-    open(original_url) { |image|
-      #Tempfileだと2個目以降のファイルが書き込めないため、普通のファイルを使う
-      File.binwrite("tmp.bin", image.read)
-#      Tempfile.open { |t|
-#        #p 'original_url=' + original_url
-#        #p 't.path=' + t.path
-#        t.binmode
-#        t.write image.read
-#        p "filesize=" + File.size(t.path).to_s
-
-        # S3へアップロード(ファイル名の後ろのクエリ文字列は削除)
-        ext = File.extname(original_url).slice(0, File.extname(original_url).index('?'))  # 拡張子のみ取り出す(「?time=1532328」等を削除)
-        upload_filename = SecureRandom.urlsafe_base64 + ext
-        p "upload_filename=" + upload_filename
-        @aws ||= MyAws.new  # 初回のみ初期設定
-        @s3_url = @aws.send(FreeComics::Application.config.cdn_folder_linemanga,
-                            "tmp.bin",  #t.path,
-                            upload_filename)
-      #}
-    }
-    return @s3_url
-  end
-
 end
