@@ -17,7 +17,7 @@ require 'json'
         + (Date.today.wday + 1).to_s
     p "url=" + url
     # シリーズ一覧を得る
-    doc = MyUtil.parse_html(url)
+    doc = MyUtil.parse_html_with_proxy(url)
     # 各シリーズごとに処理
     doc.css('div .mdCMN04Item').each do |node|
       p '--------'
@@ -32,7 +32,7 @@ require 'json'
                      + FreeComics::Application.config.url_detail_all_linemanga \
                      + series_sid
       #p "detail_all_url=" + detail_all_url
-      doc_detail_all = MyUtil.parse_html(detail_all_url)
+      doc_detail_all = MyUtil.parse_html_with_proxy(detail_all_url)
       hash = JSON.parse(doc_detail_all)
       File.open("json.txt", "w") {|f| f.puts(JSON.pretty_generate(hash)) }
       title = hash['result']['product']['name']
