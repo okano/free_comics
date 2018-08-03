@@ -20,7 +20,7 @@ class MyUtil
     option = {}
     if Rails.env.production? then
       if !ENV['PROXY_SERVER'].blank?
-        proxy +=  'https://'
+        proxy =  'https://'
         proxy += ENV['PROXY_SERVER']
         proxy += ':' + ENV['PROXY_PORT'] if !ENV['PROXY_PORT'].blank?
         proxy += '/'
