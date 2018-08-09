@@ -29,6 +29,9 @@ module FreeComics
     config.autoload_paths += %W(#{config.root}/lib)
     config.enable_dependency_loading = true
 
+    # サイト全体
+    config.site_title = 'Free Comics'
+
     # クローラ関連
     config.url_base_linemanga = 'https://manga.line.me'
     config.url_list_linemanga = '/daily_list?week_day='
