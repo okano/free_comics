@@ -8,7 +8,7 @@ require 'date'
 require 'open-uri'
 require 'nokogiri'
 require 'json'
-@debug = true
+@debug = false #true
 
   def batch
     # 日付からURLを得る
@@ -34,7 +34,7 @@ require 'json'
       #p "detail_all_url=" + detail_all_url
       doc_detail_all = MyUtil.parse_html_with_proxy(detail_all_url)
       hash = JSON.parse(doc_detail_all)
-      File.open("json.txt", "w") {|f| f.puts(JSON.pretty_generate(hash)) }
+      #File.open("json.txt", "w") {|f| f.puts(JSON.pretty_generate(hash)) }
       title = hash['result']['product']['name']
       author =hash['result']['product']['author_name']
       thumbnail_org_url = hash['result']['product']['thumbnail']
