@@ -1,6 +1,7 @@
 class Series
   include Mongoid::Document
   field :sid, type: String
+  field :original_sid, type: String
   field :title, type: String
   field :author, type: String
   field :summary, type: String

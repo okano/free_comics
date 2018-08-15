@@ -23,14 +23,14 @@ require 'json'
       p '--------'
       #p node
       # シリーズのIDを取得
-      series_sid_str = node.css('a').attribute("href").value if node.css('a').attribute("href")
-      series_sid = series_sid_str.split("/product/periodic?id=").last if series_sid_str
-      p "series_sid=" + series_sid
+      original_sid_str = node.css('a').attribute("href").value if node.css('a').attribute("href")
+      original_sid = original_sid_str.split("/product/periodic?id=").last if original_sid_str
+      p "original_sid=" + original_sid
 
       # シリーズの概要と各話を取得
       detail_all_url = FreeComics::Application.config.url_base_linemanga \
                      + FreeComics::Application.config.url_detail_all_linemanga \
-                     + series_sid
+                     + original_sid
       #p "detail_all_url=" + detail_all_url
       doc_detail_all = MyUtil.parse_html_with_proxy(detail_all_url)
       hash = JSON.parse(doc_detail_all)
@@ -49,7 +49,9 @@ require 'json'
         @s3_url = MyAws.upload_s3(thumbnail_org_url, FreeComics::Application.config.cdn_folder_linemanga)
 
         # サムネイル画像のURL付きでDBに保存
-        @s = Series.create(sid: series_sid, title: title, author: author,
+        @s = Series.create(sid: SecureRandom.urlsafe_base64,
+                          original_sid: original_sid,
+                          title: title, author: author,
                           summary:summary, thumbnail_url: @s3_url)
         p "series inserted. id=" + @s.id.to_s
       end
