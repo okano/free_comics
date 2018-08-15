@@ -1,0 +1,46 @@
+<%= provide(:title, "作品詳細") %>
+<%= provide(:site_title, FreeComics::Application.config.site_title) %>
+
+      <div class="album py-5 bg-light">
+        <div class="container">
+
+          <div class="row">
+
+<% if !@s.nil? %>
+            <div class="col-md-4">
+              <div class="card mb-4 box-shadow">
+                <img class="card-img-top" src="<%= @s.thumbnail_url %>" alt="<%= @s.title %>xx">
+                <div class="card-body">
+                  <p class="series-title"><%= @s.title %></p>
+                  <p class="series-author"><%= @s.author %></p>
+                  <p class="series-summary"><%= truncate(@s.summary, length: 80, omission: "...") %></p>
+                </div>
+              </div>
+            </div>
+<% end %>
+
+
+
+<% @topics.each do |t| %>
+            <div class="col-md-4">
+              <div class="card mb-4 box-shadow">
+                <a href="<%= t.viewer_url %>">
+                  <img class="card-img-top" src="<%= t.thumbnail_url %>" alt="<%= t.topic_number %>">
+                  <div class="card-body">
+                    <p class="topic-title"><%= t.title %></p>
+                    <p class="topic-number"><%= t.topic_number %></p>
+                    <p class="topic-summary"><%= truncate(t.summary, length: 80, omission: "...") %></p>
+                  </div>
+                </a>
+              </div>
+            </div>
+<% end %>
+
+
+
+
+
+
+          </div>
+        </div>
+      </div>

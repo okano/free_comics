@@ -21,17 +21,18 @@
 
 <% @series.each do |s| %>
             <div class="col-md-4">
-              <div class="card mb-4 box-shadow">
-                <img class="card-img-top" src="<%= s.thumbnail_url %>" alt="<%= s.title %>xx">
-                <div class="card-body">
-                  <p class="series-title"><%= s.title %></p>
-                  <p class="series-author"><%= s.author %></p>
-                  <p class="series-summary"><%= truncate(s.summary, length: 80, omission: "...") %></p>
+              <a href="series/<%= s.sid %>">
+                <div class="card mb-4 box-shadow">
+                  <img class="card-img-top" src="<%= s.thumbnail_url %>" alt="<%= s.title %>xx">
+                  <div class="card-body">
+                    <p class="series-title"><%= s.title %></p>
+                    <p class="series-author"><%= s.author %></p>
+                    <p class="series-summary"><%= truncate(s.summary, length: 80, omission: "...") %></p>
+                  </div>
                 </div>
-              </div>
+              </a>
             </div>
 <% end %>
-
           </div>
         </div>
       </div>
