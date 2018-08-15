@@ -5,6 +5,7 @@ class Series
   field :author, type: String
   field :summary, type: String
   field :thumbnail_url, type: String
+  field :topic_updated_at, type: DateTime
   field :deleted, type: Mongoid::Boolean, default: false
   include Mongoid::Document
   include Mongoid::Timestamps

@@ -53,11 +53,10 @@ require 'json'
                           summary:summary, thumbnail_url: @s3_url)
         p "series inserted. id=" + @s.id.to_s
       end
-      @s ||= Series.find_by(title: title)
-      #p "title=" + title
-      #p "Series id=" + @s.id.to_s
 
       # シリーズ内の各話を処理
+      @s ||= Series.find_by(title: title)
+      #p "Series id=" + @s.id.to_s
       hash['result']['rows'].each do |row|
         p '---'
         topic_title = row['name']
@@ -87,6 +86,10 @@ require 'json'
                             viewer_url: viewer_url
                             )
             p "topic inserted. id=" + t._id
+
+            # 親の最終更新日時(topic_updated_at)も変更。(update_atは変更しない)
+            @s.set(topic_updated_at: Time.now)
+            @s.save
           end
         end
       end
