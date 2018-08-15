@@ -60,6 +60,5 @@ gem 'mongoid'
 gem 'nokogiri'
 gem 'aws-sdk'
 
-gem 'bootstrap', '~> 4.1.1'
 gem 'jquery-rails'
-
+gem 'bootstrap', '~> 4.1.1'
